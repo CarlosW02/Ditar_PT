@@ -60,10 +60,10 @@ function render() {
 function copyCode() {
   const text = document.getElementById('codeOut').innerText;
   navigator.clipboard.writeText(text).then(() => {
-    const btn = document.querySelector('.copy-btn');
-    const orig = btn.innerText;
-    btn.innerText = '✓ Copiado';
-    setTimeout(() => { btn.innerText = orig; }, 1500);
+    const label = document.querySelector('.copy-btn-label');
+    const orig = label.textContent;
+    label.textContent = '✓ Copiado';
+    setTimeout(() => { label.textContent = orig; }, 1500);
   });
 }
 
@@ -80,11 +80,13 @@ function populateSelect(selectId, rows) {
   if (rows.some(r => r.code === prevValue)) sel.value = prevValue;
 }
 
+const CATALOG_STATUS_PILL = { ok: 'pill-ok', local: 'pill-warn', loading: 'pill-loading' };
+
 function setCatalogStatus(mode, detail) {
   const el = document.getElementById('catalogStatus');
-  el.className = 'catalog-status ' + mode;
+  el.className = 'pill ' + (CATALOG_STATUS_PILL[mode] || 'pill-loading');
   if (mode === 'ok') el.textContent = '✓ Catálogo cargado desde Supabase';
-  else if (mode === 'local') el.textContent = '⚠ Usando catálogo local (Supabase no configurado o sin conexión)' + (detail ? ' — ' + detail : '');
+  else if (mode === 'local') el.textContent = '⚠ Catálogo local' + (detail ? ' — ' + detail : '');
   else el.textContent = 'Cargando catálogo…';
 }
 
@@ -108,6 +110,14 @@ function wireEvents() {
     });
   });
   document.querySelector('.copy-btn').addEventListener('click', copyCode);
+  document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+}
+
+function toggleTheme() {
+  const root = document.documentElement;
+  const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  root.setAttribute('data-theme', next);
+  try { localStorage.setItem('ditar-theme', next); } catch (e) {}
 }
 
 async function init() {

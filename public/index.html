@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ditar SAS · Generador de Código de Producto v1.0</title>
+<style>
+  :root{
+    --ink:#13202b;
+    --ink-soft:#4a5b66;
+    --paper:#f3f0e8;
+    --panel:#ffffff;
+    --line:#d8d2c2;
+    --accent:#b5491f;
+    --accent-soft:#e9d9c8;
+    --ok:#3a6b4a;
+    --ok-bg:#e3ede4;
+    --warn:#9c7a1f;
+    --warn-bg:#f3ecd6;
+    --info:#1f5c87;
+    --info-bg:#e2ecf2;
+    --mono: 'IBM Plex Mono', 'Courier New', monospace;
+    --sans: 'IBM Plex Sans', Arial, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--sans);
+    padding:28px 32px 60px;
+  }
+  .wrap{max-width:1180px;margin:0 auto;}
+
+  .masthead{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    border-bottom:3px solid var(--ink);
+    padding-bottom:14px;
+    margin-bottom:22px;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+  .masthead h1{
+    font-size:26px;
+    font-weight:700;
+    letter-spacing:-0.01em;
+    margin:0 0 4px;
+  }
+  .masthead .sub{
+    font-size:13px;
+    color:var(--ink-soft);
+    font-family:var(--mono);
+    letter-spacing:0.02em;
+  }
+  .masthead .tag{
+    font-family:var(--mono);
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    background:var(--ink);
+    color:var(--paper);
+    padding:6px 12px;
+    border-radius:2px;
+  }
+
+  .catalog-status{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-family:var(--mono);
+    font-size:11px;
+    padding:8px 12px;
+    border-radius:4px;
+    margin-bottom:20px;
+    border:1px solid var(--line);
+    background:var(--panel);
+    color:var(--ink-soft);
+  }
+  .catalog-status.ok{background:var(--ok-bg);color:var(--ok);border-color:var(--ok);}
+  .catalog-status.local{background:var(--warn-bg);color:var(--warn);border-color:var(--warn);}
+  .catalog-status.loading{background:var(--info-bg);color:var(--info);border-color:var(--info);}
+
+  .code-display{
+    background:var(--ink);
+    border-radius:6px;
+    padding:26px 30px;
+    margin-bottom:26px;
+    position:relative;
+    overflow:hidden;
+  }
+  .code-display::before{
+    content:"";
+    position:absolute;
+    top:0;left:0;right:0;height:4px;
+    background:var(--accent);
+  }
+  .code-label{
+    font-family:var(--mono);
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.1em;
+    color:#9fb0a8;
+    margin-bottom:10px;
+  }
+  .code-string{
+    font-family:var(--mono);
+    font-size:34px;
+    font-weight:600;
+    color:#fefcf6;
+    letter-spacing:0.02em;
+    word-break:break-all;
+    line-height:1.3;
+    min-height:44px;
+  }
+  .code-string .seg{
+    transition:color .15s, background .15s;
+    padding:1px 1px;
+    border-radius:2px;
+  }
+  .code-string .seg.hl{
+    background:var(--accent);
+    color:#fff;
+  }
+  .code-segments-legend{
+    display:flex;
+    gap:14px;
+    flex-wrap:wrap;
+    margin-top:14px;
+    font-family:var(--mono);
+    font-size:10.5px;
+    color:#b9c4be;
+  }
+  .code-segments-legend span{display:flex;align-items:center;gap:5px;}
+  .dot{width:7px;height:7px;border-radius:50%;display:inline-block;background:var(--accent);}
+
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:14px;
+    margin-bottom:26px;
+  }
+  @media (max-width:900px){.grid{grid-template-columns:1fr;}}
+
+  .field{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:14px 16px;
+  }
+  .field:hover{border-color:var(--accent);}
+  .field label{
+    display:block;
+    font-family:var(--mono);
+    font-size:10.5px;
+    text-transform:uppercase;
+    letter-spacing:0.07em;
+    color:var(--ink-soft);
+    margin-bottom:8px;
+  }
+  .field select, .field input{
+    width:100%;
+    font-family:var(--sans);
+    font-size:14px;
+    padding:8px 10px;
+    border:1px solid var(--line);
+    border-radius:3px;
+    background:#fff;
+    color:var(--ink);
+  }
+  .field select:focus, .field input:focus{
+    outline:none;
+    border-color:var(--accent);
+  }
+  .field .hint{
+    font-size:11px;
+    color:var(--ink-soft);
+    margin-top:6px;
+    font-family:var(--mono);
+  }
+  .field .err{
+    font-size:11px;
+    color:var(--accent);
+    margin-top:6px;
+    font-weight:600;
+    display:none;
+  }
+  .field.has-error select, .field.has-error input{border-color:var(--accent);}
+  .field.has-error .err{display:block;}
+
+  .field-num-row{display:flex; gap:8px; align-items:center;}
+  .field-num-row input{flex:1;}
+  .field-num-row .x10{
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--ink-soft);
+    white-space:nowrap;
+  }
+
+  .section-title{
+    font-family:var(--mono);
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    color:var(--ink-soft);
+    border-bottom:1px solid var(--line);
+    padding-bottom:6px;
+    margin:30px 0 14px;
+  }
+
+  .decode-table{
+    width:100%;
+    border-collapse:collapse;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:4px;
+    overflow:hidden;
+  }
+  .decode-table th{
+    font-family:var(--mono);
+    font-size:10.5px;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:var(--ink-soft);
+    text-align:left;
+    padding:8px 12px;
+    background:var(--accent-soft);
+    border-bottom:1px solid var(--line);
+  }
+  .decode-table td{
+    padding:9px 12px;
+    font-size:13px;
+    border-bottom:1px solid var(--line);
+  }
+  .decode-table tr:last-child td{border-bottom:none;}
+  .decode-table .val{
+    font-family:var(--mono);
+    font-weight:700;
+    color:var(--accent);
+  }
+
+  .status-bar{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    margin-top:18px;
+    padding:12px 16px;
+    border-radius:4px;
+    font-size:13px;
+    font-family:var(--mono);
+  }
+  .status-ok{background:var(--ok-bg);color:var(--ok);border:1px solid var(--ok);}
+  .status-warn{background:var(--warn-bg);color:var(--warn);border:1px solid var(--warn);}
+
+  .copy-btn{
+    font-family:var(--mono);
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    background:transparent;
+    border:1px solid #5a6b66;
+    color:#cfd8d3;
+    padding:7px 14px;
+    border-radius:3px;
+    cursor:pointer;
+    margin-top:14px;
+  }
+  .copy-btn:hover{background:#27393340;}
+
+  .footer-note{
+    margin-top:36px;
+    padding-top:14px;
+    border-top:1px solid var(--line);
+    font-size:11px;
+    color:var(--ink-soft);
+    font-family:var(--mono);
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="masthead">
+    <div>
+      <h1>Generador de Código de Producto</h1>
+      <div class="sub">Ditar SAS · Nomenclatura PT v1.0 · Proyecto MDM Fase 4.1</div>
+    </div>
+    <div class="tag">29 + 8 = 37 caracteres</div>
+  </div>
+
+  <div class="catalog-status loading" id="catalogStatus">Cargando catálogo…</div>
+
+  <div class="code-display">
+    <div class="code-label">Código generado</div>
+    <div class="code-string" id="codeOut"></div>
+    <div class="code-segments-legend" id="legend"></div>
+    <button class="copy-btn" onclick="copyCode()">Copiar código</button>
+  </div>
+
+  <div class="grid">
+
+    <div class="field" id="f-tipo">
+      <label>1 · Tipo de producto</label>
+      <select id="tipo" onchange="render()">
+        <option value="Q">Q — Bolsa fondo cuadrado</option>
+        <option value="V">V — Bolsa fondo en V</option>
+        <option value="R">R — Rollos</option>
+        <option value="E">E — Empaques (exc. bolsas)</option>
+        <option value="L">L — Láminas</option>
+        <option value="X">X — Especial / No codificado</option>
+      </select>
+      <div class="hint">1 carácter</div>
+    </div>
+
+    <div class="field" id="f-cert">
+      <label>2 · Certificación</label>
+      <select id="cert" onchange="render()">
+        <option value="SC">SC — Sin certificación</option>
+        <option value="FM">FM — FSC Mix</option>
+        <option value="FR">FR — FSC Recycled</option>
+        <option value="BR">BR — BRGCS (alimentaria)</option>
+        <option value="KS">KS — Kosher (alimentaria)</option>
+        <option value="FC">FC — FSC 100%</option>
+        <option value="XX">XX — Nueva / pendiente</option>
+      </select>
+      <div class="hint">2 caracteres</div>
+    </div>
+
+    <div class="field" id="f-mat">
+      <label>3 · Material</label>
+      <select id="mat" onchange="render()">
+        <option value="01">01 — Virgen (Kraft estándar)</option>
+        <option value="02">02 — Reciclado</option>
+        <option value="03">03 — Blanco (bleached)</option>
+        <option value="04">04 — Antigrasa Natural</option>
+        <option value="05">05 — Antigrasa Blanco</option>
+        <option value="06">06 — MF Natural</option>
+        <option value="07">07 — MF Blanco</option>
+        <option value="08">08 — Rollo térmico (solo R)</option>
+        <option value="09">09 — Rollo Bond (solo R)</option>
+        <option value="10">10 — Esmaltado</option>
+        <option value="11">11 — Earthpack</option>
+        <option value="00">00 — Especial / No codificado</option>
+      </select>
+      <div class="hint">2 caracteres</div>
+    </div>
+
+    <div class="field" id="f-gram">
+      <label>4 · Gramaje nominal (g/m²)</label>
+      <input type="number" id="gram" min="0" max="999" value="100" oninput="render()">
+      <div class="hint">3 caracteres · 000 = no aplica</div>
+    </div>
+
+    <div class="field" id="f-ancho">
+      <label>5 · Ancho de bolsa (cm)</label>
+      <div class="field-num-row">
+        <input type="number" id="ancho" step="0.1" min="0" value="20" oninput="render()">
+        <span class="x10">×10 → 3c</span>
+      </div>
+      <div class="hint">Decimal: valor real ×10, relleno a 3 dígitos</div>
+    </div>
+
+    <div class="field" id="f-fuelle">
+      <label>6 · Fuelle (cm)</label>
+      <div class="field-num-row">
+        <input type="number" id="fuelle" step="0.1" min="0" value="12" oninput="render()">
+        <span class="x10">×10 → 3c</span>
+      </div>
+      <div class="hint">000 = no aplica</div>
+    </div>
+
+    <div class="field" id="f-alto">
+      <label>7 · Alto / Largo (cm)</label>
+      <div class="field-num-row">
+        <input type="number" id="alto" step="0.1" min="0" value="25" oninput="render()">
+        <span class="x10">×10 → 3c</span>
+      </div>
+      <div class="hint">000 = no aplica</div>
+    </div>
+
+    <div class="field" id="f-imp">
+      <label>8 · Impresión</label>
+      <select id="imp" onchange="render()">
+        <option value="0">0 — Sin impresión</option>
+        <option value="1">1 — Simple 1 color</option>
+        <option value="2">2 — Simple 2 colores</option>
+        <option value="3">3 — Simple 3 colores</option>
+        <option value="4">4 — Simple 4 colores</option>
+        <option value="5">5 — Simple 5 colores</option>
+        <option value="6">6 — Simple 6 colores</option>
+        <option value="7">7 — Simple &gt;6 colores</option>
+        <option value="8">8 — Impresión + Estampado</option>
+        <option value="9">9 — Especial (validar Diseño)</option>
+      </select>
+      <div class="hint">1 carácter</div>
+    </div>
+
+    <div class="field" id="f-corte">
+      <label>9 · Corte</label>
+      <select id="corte" onchange="render()">
+        <option value="0">0 — Sin corte</option>
+        <option value="1">1 — Corte liso</option>
+        <option value="2">2 — Corte dentado</option>
+        <option value="3">3 — Corte en J</option>
+        <option value="4">4 — Corte liso por doblez</option>
+        <option value="E">E — Especial (validar Producción)</option>
+      </select>
+      <div class="hint">1 carácter</div>
+    </div>
+
+    <div class="field" id="f-manija">
+      <label>10 · Manija</label>
+      <select id="manija" onchange="render()">
+        <option value="0">0 — Sin manija</option>
+        <option value="1">1 — Entorchada (papel retorcido)</option>
+        <option value="2">2 — Plana (cinta plana)</option>
+        <option value="3">3 — Algodón (alta gama)</option>
+        <option value="4">4 — Diecut (troquelada)</option>
+        <option value="E">E — Especial (validar Ingeniería)</option>
+      </select>
+      <div class="hint">El color de manija NO vive en el código — se define en la orden de producción</div>
+    </div>
+
+    <div class="field" id="f-canal">
+      <label>11 · Canal</label>
+      <select id="canal" onchange="render()">
+        <option value="N">N — Nacional</option>
+        <option value="E">E — Exportación</option>
+        <option value="D">D — Distribuidor</option>
+        <option value="X">X — Especial</option>
+      </select>
+      <div class="hint">1 carácter</div>
+    </div>
+
+    <div class="field" id="f-marca">
+      <label>12 · Marca (3 letras)</label>
+      <input type="text" id="marca" maxlength="3" value="NOR" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase();render()">
+      <div class="hint">3 primeras letras de la marca / cliente</div>
+    </div>
+
+    <div class="field" id="f-version">
+      <label>13 · Versión de arte</label>
+      <input type="number" id="version" min="0" max="99999" value="1" oninput="render()">
+      <div class="hint">5 caracteres · cambia con cada nuevo diseño</div>
+    </div>
+
+  </div>
+
+  <div id="statusBar"></div>
+
+  <div class="section-title">Decodificación del código generado</div>
+  <table class="decode-table" id="decodeTable"></table>
+
+  <div class="footer-note">
+    Ditar SAS · Proyecto MDM &amp; Optimización Transaccional · Fase 1 — Nomenclatura PT v1.0<br>
+    Regla de decimales: valor real × 10, relleno con ceros a la izquierda a 3 dígitos (ej. 5.5 cm → 055 · 28.5 cm → 285 · 20 cm → 200)<br>
+    Catálogo de campos servido desde Supabase (con respaldo local si no hay conexión).
+  </div>
+
+</div>
+
+<script src="config.js"></script>
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+// Respaldo local: se usa si Supabase no está configurado o falla la carga.
+const FALLBACK = {
+  tipo:    {Q:"Bolsa fondo cuadrado",V:"Bolsa fondo en V",R:"Rollos",E:"Empaques",L:"Láminas",X:"Especial"},
+  cert:    {SC:"Sin certificación",FM:"FSC Mix",FR:"FSC Recycled",BR:"BRGCS",KS:"Kosher",FC:"FSC 100%",XX:"Nueva/pendiente"},
+  mat:     {"01":"Virgen","02":"Reciclado","03":"Blanco","04":"Antigrasa Natural","05":"Antigrasa Blanco","06":"MF Natural","07":"MF Blanco","08":"Rollo térmico","09":"Rollo Bond","10":"Esmaltado","11":"Earthpack","00":"Especial/No codificado"},
+  imp:     {0:"Sin impresión",1:"Simple 1 color",2:"Simple 2 colores",3:"Simple 3 colores",4:"Simple 4 colores",5:"Simple 5 colores",6:"Simple 6 colores",7:"Simple >6 colores",8:"Impresión + Estampado",9:"Especial"},
+  corte:   {0:"Sin corte",1:"Corte liso",2:"Corte dentado",3:"Corte en J",4:"Corte liso por doblez",E:"Especial"},
+  manija:  {0:"Sin manija",1:"Entorchada",2:"Plana",3:"Algodón",4:"Diecut",E:"Especial"},
+  canal:   {N:"Nacional",E:"Exportación",D:"Distribuidor",X:"Especial"},
+};
+
+const CATALOG_TABLES = [
+  {table:'tipo_producto', key:'tipo',   selectId:'tipo'},
+  {table:'certificacion', key:'cert',   selectId:'cert'},
+  {table:'material',      key:'mat',    selectId:'mat'},
+  {table:'impresion',     key:'imp',    selectId:'imp'},
+  {table:'corte',         key:'corte',  selectId:'corte'},
+  {table:'manija',        key:'manija', selectId:'manija'},
+  {table:'canal',         key:'canal',  selectId:'canal'},
+];
+
+let labels = JSON.parse(JSON.stringify(FALLBACK));
+
+function dimTo3(val){
+  let n = parseFloat(val);
+  if(isNaN(n) || n < 0) n = 0;
+  let scaled = Math.round(n * 10);
+  if(scaled > 999) scaled = 999;
+  return String(scaled).padStart(3,'0');
+}
+function pad(val, len){
+  return String(val).padStart(len,'0').slice(0,len);
+}
+
+function render(){
+  const tipo = document.getElementById('tipo').value;
+  const cert = document.getElementById('cert').value;
+  const mat = document.getElementById('mat').value;
+  const gram = pad(document.getElementById('gram').value || 0, 3);
+  const anchoRaw = document.getElementById('ancho').value;
+  const fuelleRaw = document.getElementById('fuelle').value;
+  const altoRaw = document.getElementById('alto').value;
+  const ancho = dimTo3(anchoRaw);
+  const fuelle = dimTo3(fuelleRaw);
+  const alto = dimTo3(altoRaw);
+  const imp = document.getElementById('imp').value;
+  const corte = document.getElementById('corte').value;
+  const manija = document.getElementById('manija').value;
+  const canal = document.getElementById('canal').value;
+  let marca = (document.getElementById('marca').value || '').toUpperCase().padEnd(3,'X').slice(0,3);
+  const version = pad(document.getElementById('version').value || 0, 5);
+
+  document.getElementById('codeOut').innerHTML =
+    `<span class="seg">${tipo}</span><span class="seg">${cert}</span><span class="seg">${mat}</span><span class="seg">${gram}</span><span class="seg">${ancho}</span><span class="seg">${fuelle}</span><span class="seg">${alto}</span><span class="seg">${imp}</span><span class="seg">${corte}</span><span class="seg">${manija}</span><span class="seg">${canal}</span>-<span class="seg">${marca}</span><span class="seg">${version}</span>`;
+
+  document.getElementById('legend').innerHTML =
+    `<span><i class="dot" style="background:#b5491f"></i>Tipo/Impresión</span>
+     <span><i class="dot" style="background:#3a6b4a"></i>Cert/Corte</span>
+     <span><i class="dot" style="background:#9c7a1f"></i>Material/Manija</span>
+     <span><i class="dot" style="background:#1f5c87"></i>Gramaje/Canal</span>
+     <span><i class="dot" style="background:#7a3a8f"></i>Dimensiones</span>`;
+
+  const rows = [
+    ['1','Tipo', tipo, labels.tipo[tipo] || '—'],
+    ['2','Certificación', cert, labels.cert[cert] || '—'],
+    ['3','Material', mat, labels.mat[mat] || '—'],
+    ['4','Gramaje', gram, gram+' g/m² (nominal)'],
+    ['5','Ancho', ancho, (anchoRaw||0)+' cm → ×10 → '+ancho],
+    ['6','Fuelle', fuelle, (fuelleRaw||0)+' cm → ×10 → '+fuelle],
+    ['7','Alto', alto, (altoRaw||0)+' cm → ×10 → '+alto],
+    ['8','Impresión', imp, labels.imp[imp] || '—'],
+    ['9','Corte', corte, labels.corte[corte] || '—'],
+    ['10','Manija', manija, labels.manija[manija] || '—'],
+    ['11','Canal', canal, labels.canal[canal] || '—'],
+    ['12','Marca', marca, 'Cliente / marca comercial'],
+    ['13','Versión arte', version, 'Cambia con cada nuevo diseño'],
+  ];
+  let tbody = '<tr><th>#</th><th>Campo</th><th>Valor</th><th>Significado</th></tr>';
+  rows.forEach(r=>{
+    tbody += `<tr><td>${r[0]}</td><td>${r[1]}</td><td class="val">${r[2]}</td><td>${r[3]}</td></tr>`;
+  });
+  document.getElementById('decodeTable').innerHTML = tbody;
+
+  let warnings = [];
+  if(mat==='08' || mat==='09'){
+    if(tipo!=='R') warnings.push('Material '+mat+' ('+(labels.mat[mat]||mat)+') está reservado solo para Tipo R (Rollos).');
+  }
+  if(manija!=='0' && tipo!=='Q'){
+    warnings.push('Manija distinta de "Sin manija" es atípica fuera de Tipo Q — validar con Ingeniería.');
+  }
+  if(marca.length < 3 || /X{1,3}$/.test(marca) && document.getElementById('marca').value.length < 3){
+    warnings.push('Marca incompleta — debe tener exactamente 3 letras.');
+  }
+
+  const statusBar = document.getElementById('statusBar');
+  if(warnings.length){
+    statusBar.innerHTML = `<div class="status-bar status-warn">⚠ ${warnings.join(' · ')}</div>`;
+  } else {
+    statusBar.innerHTML = `<div class="status-bar status-ok">✓ Código válido — estructura conforme a Nomenclatura PT v1.0 (37 caracteres totales)</div>`;
+  }
+}
+
+function copyCode(){
+  const text = document.getElementById('codeOut').innerText;
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn = document.querySelector('.copy-btn');
+    const orig = btn.innerText;
+    btn.innerText = '✓ Copiado';
+    setTimeout(()=>btn.innerText = orig, 1500);
+  });
+}
+
+function setCatalogStatus(mode, detail){
+  const el = document.getElementById('catalogStatus');
+  el.className = 'catalog-status ' + mode;
+  if(mode === 'ok') el.textContent = '✓ Catálogo cargado desde Supabase';
+  else if(mode === 'local') el.textContent = '⚠ Usando catálogo local (Supabase no configurado o sin conexión)' + (detail ? ' — ' + detail : '');
+  else el.textContent = 'Cargando catálogo…';
+}
+
+function populateSelect(selectId, rows){
+  const sel = document.getElementById(selectId);
+  const prevValue = sel.value;
+  sel.innerHTML = '';
+  rows.forEach(row => {
+    const opt = document.createElement('option');
+    opt.value = row.code;
+    opt.textContent = `${row.code} — ${row.label}`;
+    sel.appendChild(opt);
+  });
+  if(rows.some(r => r.code === prevValue)) sel.value = prevValue;
+}
+
+async function loadCatalogFromSupabase(client){
+  for(const t of CATALOG_TABLES){
+    const { data, error } = await client
+      .from(t.table)
+      .select('code,label')
+      .order('sort_order', { ascending: true });
+    if(error) throw error;
+    if(!data || !data.length) throw new Error(`Tabla "${t.table}" vacía`);
+    const map = {};
+    data.forEach(row => { map[row.code] = row.label; });
+    labels[t.key] = map;
+    populateSelect(t.selectId, data);
+  }
+}
+
+async function init(){
+  window.render = render;
+  window.copyCode = copyCode;
+  render();
+
+  const config = window.__SUPABASE_CONFIG__ || {};
+  if(!config.url || !config.anonKey){
+    setCatalogStatus('local', 'sin credenciales en config.js');
+    return;
+  }
+  try{
+    const client = createClient(config.url, config.anonKey);
+    await loadCatalogFromSupabase(client);
+    setCatalogStatus('ok');
+  }catch(e){
+    console.warn('No se pudo cargar el catálogo desde Supabase:', e);
+    setCatalogStatus('local', e.message || 'error de conexión');
+  }
+  render();
+}
+
+init();
+</script>
+</body>
+</html>

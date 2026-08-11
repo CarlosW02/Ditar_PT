@@ -14,7 +14,7 @@
       <h1>Generador de Código de Producto</h1>
       <div class="sub">Ditar SAS · Nomenclatura PT v1.0 · Proyecto MDM Fase 4.1</div>
     </div>
-    <div class="tag">29 + 8 = 37 caracteres</div>
+    <div class="tag">21 + 10 = 31 caracteres</div>
   </div>
 
   <div class="catalog-status loading" id="catalogStatus">Cargando catálogo…</div>
@@ -150,25 +150,34 @@
       <div class="hint">El color de manija NO vive en el código — se define en la orden de producción</div>
     </div>
 
+    <div class="field" id="f-contacto">
+      <label>11 · Contacto directo con alimento</label>
+      <select id="contacto">
+        <option value="0">0 — No tiene contacto directo con alimento</option>
+        <option value="1">1 — Sí tiene contacto directo con alimento</option>
+      </select>
+      <div class="hint">1 carácter · va antes del guión</div>
+    </div>
+
     <div class="field" id="f-canal">
-      <label>11 · Canal</label>
+      <label>12 · Canal</label>
       <select id="canal">
         <option value="N">N — Nacional</option>
         <option value="E">E — Exportación</option>
         <option value="D">D — Distribuidor</option>
         <option value="X">X — Especial</option>
       </select>
-      <div class="hint">1 carácter</div>
+      <div class="hint">1 carácter · va después del guión</div>
     </div>
 
     <div class="field" id="f-marca">
-      <label>12 · Marca (3 letras)</label>
+      <label>13 · Marca (3 letras)</label>
       <input type="text" id="marca" maxlength="3" value="NOR" style="text-transform:uppercase">
       <div class="hint">3 primeras letras de la marca / cliente</div>
     </div>
 
     <div class="field" id="f-version">
-      <label>13 · Versión de arte</label>
+      <label>14 · Versión de arte</label>
       <input type="number" id="version" min="0" max="99999" value="1">
       <div class="hint">5 caracteres · cambia con cada nuevo diseño</div>
     </div>

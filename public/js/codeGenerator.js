@@ -14,8 +14,13 @@ export function pad(val, len) {
   return String(val).padStart(len, '0').slice(0, len);
 }
 
-// raw: {tipo, cert, mat, gram, ancho, fuelle, alto, imp, corte, manija, canal, marca, version}
+// raw: {tipo, cert, mat, gram, ancho, fuelle, alto, imp, corte, manija,
+//       contacto, canal, marca, version}
 // valores tal cual vienen del formulario (strings/numbers sin normalizar).
+//
+// Estructura del código: [núcleo]-[canal][marca][versión]
+// El núcleo (antes del guión) termina en "contacto" (1 = contacto directo
+// con alimento, 0 = no); el canal vive después del guión.
 export function computeProductCode(raw) {
   const tipo = raw.tipo;
   const cert = raw.cert;
@@ -27,15 +32,17 @@ export function computeProductCode(raw) {
   const imp = raw.imp;
   const corte = raw.corte;
   const manija = raw.manija;
+  const contacto = raw.contacto;
   const canal = raw.canal;
   const marca = (raw.marca || '').toUpperCase().padEnd(3, 'X').slice(0, 3);
   const version = pad(raw.version || 0, 5);
 
-  const core = [tipo, cert, mat, gram, ancho, fuelle, alto, imp, corte, manija, canal].join('');
-  const fullCode = `${core}-${marca}${version}`;
+  const core = [tipo, cert, mat, gram, ancho, fuelle, alto, imp, corte, manija, contacto].join('');
+  const suffix = [canal, marca, version].join('');
+  const fullCode = `${core}-${suffix}`;
 
   return {
-    tipo, cert, mat, gram, ancho, fuelle, alto, imp, corte, manija, canal, marca, version,
+    tipo, cert, mat, gram, ancho, fuelle, alto, imp, corte, manija, contacto, canal, marca, version,
     anchoRaw: raw.ancho, fuelleRaw: raw.fuelle, altoRaw: raw.alto,
     core, fullCode,
   };
@@ -54,9 +61,10 @@ export function buildDecodeRows(p, labels) {
     ['8', 'Impresión', p.imp, labels.imp[p.imp] || '—'],
     ['9', 'Corte', p.corte, labels.corte[p.corte] || '—'],
     ['10', 'Manija', p.manija, labels.manija[p.manija] || '—'],
-    ['11', 'Canal', p.canal, labels.canal[p.canal] || '—'],
-    ['12', 'Marca', p.marca, 'Cliente / marca comercial'],
-    ['13', 'Versión arte', p.version, 'Cambia con cada nuevo diseño'],
+    ['11', 'Contacto alimento', p.contacto, labels.contacto[p.contacto] || '—'],
+    ['12', 'Canal', p.canal, labels.canal[p.canal] || '—'],
+    ['13', 'Marca', p.marca, 'Cliente / marca comercial'],
+    ['14', 'Versión arte', p.version, 'Cambia con cada nuevo diseño'],
   ];
 }
 

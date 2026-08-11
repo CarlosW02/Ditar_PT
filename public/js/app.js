@@ -6,7 +6,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { FALLBACK_LABELS, CATALOG_TABLES, fetchCatalogTable } from './catalog.js';
 import { computeProductCode, buildDecodeRows, validateProductCode } from './codeGenerator.js';
 
-const FIELD_IDS = ['tipo','cert','mat','gram','ancho','fuelle','alto','imp','corte','manija','canal','marca','version'];
+const FIELD_IDS = ['tipo','cert','mat','gram','ancho','fuelle','alto','imp','corte','manija','contacto','canal','marca','version'];
 
 const LEGEND_HTML = `<span><i class="dot" style="background:#b5491f"></i>Tipo/Impresión</span>
      <span><i class="dot" style="background:#3a6b4a"></i>Cert/Corte</span>
@@ -24,7 +24,8 @@ function readRawFields() {
   return {
     tipo: val('tipo'), cert: val('cert'), mat: val('mat'), gram: val('gram'),
     ancho: val('ancho'), fuelle: val('fuelle'), alto: val('alto'),
-    imp: val('imp'), corte: val('corte'), manija: val('manija'), canal: val('canal'),
+    imp: val('imp'), corte: val('corte'), manija: val('manija'),
+    contacto: val('contacto'), canal: val('canal'),
     marca: val('marca'), version: val('version'),
   };
 }
@@ -36,8 +37,8 @@ function render() {
     `<span class="seg">${p.tipo}</span><span class="seg">${p.cert}</span><span class="seg">${p.mat}</span>` +
     `<span class="seg">${p.gram}</span><span class="seg">${p.ancho}</span><span class="seg">${p.fuelle}</span>` +
     `<span class="seg">${p.alto}</span><span class="seg">${p.imp}</span><span class="seg">${p.corte}</span>` +
-    `<span class="seg">${p.manija}</span><span class="seg">${p.canal}</span>-<span class="seg">${p.marca}</span>` +
-    `<span class="seg">${p.version}</span>`;
+    `<span class="seg">${p.manija}</span><span class="seg">${p.contacto}</span>-<span class="seg">${p.canal}</span>` +
+    `<span class="seg">${p.marca}</span><span class="seg">${p.version}</span>`;
 
   document.getElementById('legend').innerHTML = LEGEND_HTML;
 
@@ -53,7 +54,7 @@ function render() {
   const statusBar = document.getElementById('statusBar');
   statusBar.innerHTML = warnings.length
     ? `<div class="status-bar status-warn">⚠ ${warnings.join(' · ')}</div>`
-    : `<div class="status-bar status-ok">✓ Código válido — estructura conforme a Nomenclatura PT v1.0 (37 caracteres totales)</div>`;
+    : `<div class="status-bar status-ok">✓ Código válido — estructura conforme a Nomenclatura PT v1.0 (${p.fullCode.length} caracteres totales)</div>`;
 }
 
 function copyCode() {

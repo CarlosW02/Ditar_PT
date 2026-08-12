@@ -1,6 +1,12 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
-import { dimTo3, pad, computeProductCode, buildDecodeRows, validateProductCode } from './codeGenerator.js';
+import {
+  dimTo3,
+  pad,
+  computeProductCode,
+  buildDecodeRows,
+  validateProductCode,
+} from './codeGenerator.js';
 
 describe('dimTo3', () => {
   test('escala un valor entero por 10 y rellena a 3 dígitos', () => {
@@ -59,10 +65,20 @@ describe('pad', () => {
 
 function baseRaw(overrides = {}) {
   return {
-    tipo: 'Q', cert: 'SC', mat: '01', gram: '100',
-    ancho: '20', fuelle: '12', alto: '25',
-    imp: '0', corte: '0', manija: '0',
-    contacto: '0', canal: 'N', marca: 'nor', version: '1',
+    tipo: 'Q',
+    cert: 'SC',
+    mat: '01',
+    gram: '100',
+    ancho: '20',
+    fuelle: '12',
+    alto: '25',
+    imp: '0',
+    corte: '0',
+    manija: '0',
+    contacto: '0',
+    canal: 'N',
+    marca: 'nor',
+    version: '1',
     ...overrides,
   };
 }
@@ -118,10 +134,10 @@ describe('buildDecodeRows', () => {
     tipo: { Q: 'Bolsa fondo cuadrado' },
     cert: { SC: 'Sin certificación' },
     mat: { '01': 'Virgen' },
-    imp: { '0': 'Sin impresión' },
-    corte: { '0': 'Sin corte' },
-    manija: { '0': 'Sin manija' },
-    contacto: { '0': 'No tiene contacto directo con alimento' },
+    imp: { 0: 'Sin impresión' },
+    corte: { 0: 'Sin corte' },
+    manija: { 0: 'Sin manija' },
+    contacto: { 0: 'No tiene contacto directo con alimento' },
     canal: { N: 'Nacional' },
   };
 

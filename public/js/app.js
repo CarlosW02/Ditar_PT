@@ -6,7 +6,22 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.112.3';
 import { FALLBACK_LABELS, CATALOG_TABLES, fetchCatalogTable } from './catalog.js';
 import { computeProductCode, buildDecodeRows, validateProductCode } from './codeGenerator.js';
 
-const FIELD_IDS = ['tipo','cert','mat','gram','ancho','fuelle','alto','imp','corte','manija','contacto','canal','marca','version'];
+const FIELD_IDS = [
+  'tipo',
+  'cert',
+  'mat',
+  'gram',
+  'ancho',
+  'fuelle',
+  'alto',
+  'imp',
+  'corte',
+  'manija',
+  'contacto',
+  'canal',
+  'marca',
+  'version',
+];
 
 const LEGEND_HTML = `<span><i class="dot" style="background:#b5491f"></i>Tipo/Impresión</span>
      <span><i class="dot" style="background:#3a6b4a"></i>Cert/Corte</span>
@@ -22,11 +37,20 @@ function val(id) {
 
 function readRawFields() {
   return {
-    tipo: val('tipo'), cert: val('cert'), mat: val('mat'), gram: val('gram'),
-    ancho: val('ancho'), fuelle: val('fuelle'), alto: val('alto'),
-    imp: val('imp'), corte: val('corte'), manija: val('manija'),
-    contacto: val('contacto'), canal: val('canal'),
-    marca: val('marca'), version: val('version'),
+    tipo: val('tipo'),
+    cert: val('cert'),
+    mat: val('mat'),
+    gram: val('gram'),
+    ancho: val('ancho'),
+    fuelle: val('fuelle'),
+    alto: val('alto'),
+    imp: val('imp'),
+    corte: val('corte'),
+    manija: val('manija'),
+    contacto: val('contacto'),
+    canal: val('canal'),
+    marca: val('marca'),
+    version: val('version'),
   };
 }
 
@@ -44,7 +68,7 @@ function render() {
 
   const rows = buildDecodeRows(p, labels);
   let tbody = '<tr><th>#</th><th>Campo</th><th>Valor</th><th>Significado</th></tr>';
-  rows.forEach(r => {
+  rows.forEach((r) => {
     tbody += `<tr><td>${r[0]}</td><td>${r[1]}</td><td class="val">${r[2]}</td><td>${r[3]}</td></tr>`;
   });
   document.getElementById('decodeTable').innerHTML = tbody;
@@ -63,7 +87,9 @@ function copyCode() {
     const label = document.querySelector('.copy-btn-label');
     const orig = label.textContent;
     label.textContent = '✓ Copiado';
-    setTimeout(() => { label.textContent = orig; }, 1500);
+    setTimeout(() => {
+      label.textContent = orig;
+    }, 1500);
   });
 }
 
@@ -71,13 +97,13 @@ function populateSelect(selectId, rows) {
   const sel = document.getElementById(selectId);
   const prevValue = sel.value;
   sel.innerHTML = '';
-  rows.forEach(row => {
+  rows.forEach((row) => {
     const opt = document.createElement('option');
     opt.value = row.code;
     opt.textContent = `${row.code} — ${row.label}`;
     sel.appendChild(opt);
   });
-  if (rows.some(r => r.code === prevValue)) sel.value = prevValue;
+  if (rows.some((r) => r.code === prevValue)) sel.value = prevValue;
 }
 
 const CATALOG_STATUS_PILL = { ok: 'pill-ok', local: 'pill-warn', loading: 'pill-loading' };
@@ -94,14 +120,16 @@ async function loadCatalogFromSupabase(client) {
   for (const t of CATALOG_TABLES) {
     const data = await fetchCatalogTable(client, t.table);
     const map = {};
-    data.forEach(row => { map[row.code] = row.label; });
+    data.forEach((row) => {
+      map[row.code] = row.label;
+    });
     labels[t.key] = map;
     populateSelect(t.selectId, data);
   }
 }
 
 function wireEvents() {
-  FIELD_IDS.forEach(id => {
+  FIELD_IDS.forEach((id) => {
     const el = document.getElementById(id);
     const evt = el.tagName === 'SELECT' ? 'change' : 'input';
     el.addEventListener(evt, () => {
@@ -117,7 +145,11 @@ function toggleTheme() {
   const root = document.documentElement;
   const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
   root.setAttribute('data-theme', next);
-  try { localStorage.setItem('ditar-theme', next); } catch (e) {}
+  try {
+    localStorage.setItem('ditar-theme', next);
+  } catch {
+    /* localStorage no disponible (modo privado, etc.) */
+  }
 }
 
 async function init() {

@@ -42,9 +42,25 @@ export function computeProductCode(raw) {
   const fullCode = `${core}-${suffix}`;
 
   return {
-    tipo, cert, mat, gram, ancho, fuelle, alto, imp, corte, manija, contacto, canal, marca, version,
-    anchoRaw: raw.ancho, fuelleRaw: raw.fuelle, altoRaw: raw.alto,
-    core, fullCode,
+    tipo,
+    cert,
+    mat,
+    gram,
+    ancho,
+    fuelle,
+    alto,
+    imp,
+    corte,
+    manija,
+    contacto,
+    canal,
+    marca,
+    version,
+    anchoRaw: raw.ancho,
+    fuelleRaw: raw.fuelle,
+    altoRaw: raw.alto,
+    core,
+    fullCode,
   };
 }
 
@@ -74,11 +90,15 @@ export function validateProductCode(p, labels, marcaInputLength) {
   const warnings = [];
   if (p.mat === '08' || p.mat === '09') {
     if (p.tipo !== 'R') {
-      warnings.push(`Material ${p.mat} (${labels.mat[p.mat] || p.mat}) está reservado solo para Tipo R (Rollos).`);
+      warnings.push(
+        `Material ${p.mat} (${labels.mat[p.mat] || p.mat}) está reservado solo para Tipo R (Rollos).`,
+      );
     }
   }
   if (p.manija !== '0' && p.tipo !== 'Q') {
-    warnings.push('Manija distinta de "Sin manija" es atípica fuera de Tipo Q — validar con Ingeniería.');
+    warnings.push(
+      'Manija distinta de "Sin manija" es atípica fuera de Tipo Q — validar con Ingeniería.',
+    );
   }
   if (marcaInputLength < 3) {
     warnings.push('Marca incompleta — debe tener exactamente 3 letras.');

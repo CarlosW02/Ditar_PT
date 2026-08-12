@@ -4,11 +4,11 @@ import { fetchCatalogTable } from './catalog.js';
 
 function makeClient(queryResult) {
   return {
-    from(table) {
+    from(_table) {
       return {
-        select(cols) {
+        select(_cols) {
           return {
-            order(col, opts) {
+            order(_col, _opts) {
               return queryResult;
             },
           };
@@ -20,13 +20,17 @@ function makeClient(queryResult) {
 
 describe('fetchCatalogTable', () => {
   test('devuelve los datos cuando la consulta responde a tiempo', async () => {
-    const client = makeClient(Promise.resolve({ data: [{ code: 'A', label: 'Alpha' }], error: null }));
+    const client = makeClient(
+      Promise.resolve({ data: [{ code: 'A', label: 'Alpha' }], error: null }),
+    );
     const rows = await fetchCatalogTable(client, 'tabla', 50);
     assert.deepEqual(rows, [{ code: 'A', label: 'Alpha' }]);
   });
 
   test('lanza el error de Supabase si la consulta falla', async () => {
-    const client = makeClient(Promise.resolve({ data: null, error: new Error('conexión rechazada') }));
+    const client = makeClient(
+      Promise.resolve({ data: null, error: new Error('conexión rechazada') }),
+    );
     await assert.rejects(() => fetchCatalogTable(client, 'tabla', 50), /conexión rechazada/);
   });
 

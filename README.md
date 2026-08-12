@@ -54,6 +54,19 @@ npx vercel --prod
 `vercel.json` ya define `buildCommand: node build.js` y `outputDirectory: public`,
 así que Vercel genera `config.js` en cada build con las env vars del proyecto.
 
+## Calidad de código
+
+```bash
+npm install     # instala eslint/prettier (una sola vez)
+npm run lint    # revisa errores con ESLint
+npm run format  # aplica formato con Prettier
+npm test        # corre los tests
+```
+
+CI (GitHub Actions) corre lint, format:check y test en cada push/PR a
+`main` — corre estos comandos localmente antes de subir cambios para que
+no te sorprenda un check en rojo.
+
 ## Editar el catálogo
 
 Para agregar o modificar opciones (nuevo material, nuevo canal, etc.) basta con

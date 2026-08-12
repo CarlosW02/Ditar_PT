@@ -1,0 +1,40 @@
+const js = require('@eslint/js');
+const globals = require('globals');
+const prettierConfig = require('eslint-config-prettier');
+
+module.exports = [
+  js.configs.recommended,
+  prettierConfig,
+  {
+    rules: {
+      'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+    },
+  },
+  {
+    ignores: ['node_modules/**', 'public/config.js'],
+  },
+  {
+    files: ['public/js/**/*.js'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'module',
+      globals: { ...globals.browser },
+    },
+  },
+  {
+    files: ['public/js/**/*.test.mjs'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'module',
+      globals: { ...globals.node },
+    },
+  },
+  {
+    files: ['build.js', 'eslint.config.js'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'commonjs',
+      globals: { ...globals.node },
+    },
+  },
+];

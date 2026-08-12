@@ -1,8 +1,4 @@
 node_modules/
 .vercel
-.env
-.env.local
-public/config.js
-
-.vercel
 .env*
+public/config.js

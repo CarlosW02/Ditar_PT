@@ -10,14 +10,15 @@ const FIELD_IDS = [
   'tipo',
   'cert',
   'mat',
+  'contacto',
   'gram',
   'ancho',
   'fuelle',
   'alto',
   'imp',
+  'estampado',
   'corte',
   'manija',
-  'contacto',
   'canal',
   'marca',
   'version',
@@ -40,14 +41,15 @@ function readRawFields() {
     tipo: val('tipo'),
     cert: val('cert'),
     mat: val('mat'),
+    contacto: val('contacto'),
     gram: val('gram'),
     ancho: val('ancho'),
     fuelle: val('fuelle'),
     alto: val('alto'),
     imp: val('imp'),
+    estampado: val('estampado'),
     corte: val('corte'),
     manija: val('manija'),
-    contacto: val('contacto'),
     canal: val('canal'),
     marca: val('marca'),
     version: val('version'),
@@ -59,10 +61,10 @@ function render() {
 
   document.getElementById('codeOut').innerHTML =
     `<span class="seg">${p.tipo}</span><span class="seg">${p.cert}</span><span class="seg">${p.mat}</span>` +
-    `<span class="seg">${p.gram}</span><span class="seg">${p.ancho}</span><span class="seg">${p.fuelle}</span>` +
-    `<span class="seg">${p.alto}</span><span class="seg">${p.imp}</span><span class="seg">${p.corte}</span>` +
-    `<span class="seg">${p.manija}</span><span class="seg">${p.contacto}</span>-<span class="seg">${p.canal}</span>` +
-    `<span class="seg">${p.marca}</span><span class="seg">${p.version}</span>`;
+    `<span class="seg">${p.contacto}</span><span class="seg">${p.ancho}</span><span class="seg">${p.fuelle}</span>` +
+    `<span class="seg">${p.alto}</span><span class="seg">${p.gramajeBanda}</span><span class="seg">${p.imp}</span>` +
+    `<span class="seg">${p.estampado}</span><span class="seg">${p.corte}</span><span class="seg">${p.manija}</span>` +
+    `-<span class="seg">${p.canal}</span><span class="seg">${p.marca}</span><span class="seg">${p.version}</span>`;
 
   document.getElementById('legend').innerHTML = LEGEND_HTML;
 

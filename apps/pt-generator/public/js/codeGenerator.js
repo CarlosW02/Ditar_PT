@@ -14,30 +14,65 @@ export function pad(val, len) {
   return String(val).padStart(len, '0').slice(0, len);
 }
 
-// raw: {tipo, cert, mat, gram, ancho, fuelle, alto, imp, corte, manija,
-//       contacto, canal, marca, version}
+// Convierte el gramaje real (g/m²) a la banda de un dígito que va en el
+// código — el código nunca lleva el gramaje exacto, solo la banda a la que
+// pertenece. Rangos portados de codigoPt.ts (ditar-commercial-system,
+// puerto fiel de Cotizador_Ditar_piloto V20·R3) — PENDIENTE de validar
+// contra la fuente oficial: el propio piloto admite que no coinciden con
+// la hoja Catalogos_Gramajes de Ditar_MDM_Sheet_v3.0.xlsx.
+export function gramajeABanda(gramaje) {
+  const g = parseFloat(gramaje);
+  if (!g || g <= 0) return '0';
+  if (g <= 39) return '1';
+  if (g <= 59) return '2';
+  if (g <= 79) return '3';
+  if (g <= 94) return '4';
+  if (g <= 104) return '5';
+  if (g <= 114) return '6';
+  if (g <= 129) return '7';
+  if (g <= 145) return '8';
+  return '9';
+}
+
+// raw: {tipo, cert, mat, contacto, gram, ancho, fuelle, alto, imp, estampado,
+//       corte, manija, canal, marca, version}
 // valores tal cual vienen del formulario (strings/numbers sin normalizar).
 //
 // Estructura del código: [núcleo]-[canal][marca][versión]
-// El núcleo (antes del guión) termina en "contacto" (1 = contacto directo
-// con alimento, 0 = no); el canal vive después del guión.
+// El núcleo empieza en tipo/cert/material y el dígito de "contacto con
+// alimento" va justo después del material (no al final); el canal vive
+// después del guión.
 export function computeProductCode(raw) {
   const tipo = raw.tipo;
   const cert = raw.cert;
   const mat = raw.mat;
-  const gram = pad(raw.gram || 0, 3);
+  const contacto = raw.contacto;
   const ancho = dimTo3(raw.ancho);
   const fuelle = dimTo3(raw.fuelle);
   const alto = dimTo3(raw.alto);
+  const gramajeBanda = gramajeABanda(raw.gram);
   const imp = raw.imp;
+  const estampado = raw.estampado;
   const corte = raw.corte;
   const manija = raw.manija;
-  const contacto = raw.contacto;
   const canal = raw.canal;
   const marca = (raw.marca || '').toUpperCase().padEnd(3, 'X').slice(0, 3);
   const version = pad(raw.version || 0, 5);
 
-  const core = [tipo, cert, mat, gram, ancho, fuelle, alto, imp, corte, manija, contacto].join('');
+  const core = [
+    tipo,
+    cert,
+    mat,
+    contacto,
+    ancho,
+    fuelle,
+    alto,
+    gramajeBanda,
+    imp,
+    estampado,
+    corte,
+    manija,
+  ].join('');
   const suffix = [canal, marca, version].join('');
   const fullCode = `${core}-${suffix}`;
 
@@ -45,17 +80,19 @@ export function computeProductCode(raw) {
     tipo,
     cert,
     mat,
-    gram,
+    contacto,
     ancho,
     fuelle,
     alto,
+    gramajeBanda,
     imp,
+    estampado,
     corte,
     manija,
-    contacto,
     canal,
     marca,
     version,
+    gramajeRaw: raw.gram,
     anchoRaw: raw.ancho,
     fuelleRaw: raw.fuelle,
     altoRaw: raw.alto,
@@ -70,17 +107,18 @@ export function buildDecodeRows(p, labels) {
     ['1', 'Tipo', p.tipo, labels.tipo[p.tipo] || '—'],
     ['2', 'Certificación', p.cert, labels.cert[p.cert] || '—'],
     ['3', 'Material', p.mat, labels.mat[p.mat] || '—'],
-    ['4', 'Gramaje', p.gram, `${p.gram} g/m² (nominal)`],
-    ['5', 'Ancho', p.ancho, `${p.anchoRaw || 0} cm → ×10 → ${p.ancho}`],
-    ['6', 'Fuelle', p.fuelle, `${p.fuelleRaw || 0} cm → ×10 → ${p.fuelle}`],
-    ['7', 'Alto', p.alto, `${p.altoRaw || 0} cm → ×10 → ${p.alto}`],
-    ['8', 'Impresión', p.imp, labels.imp[p.imp] || '—'],
-    ['9', 'Corte', p.corte, labels.corte[p.corte] || '—'],
-    ['10', 'Manija', p.manija, labels.manija[p.manija] || '—'],
-    ['11', 'Contacto alimento', p.contacto, labels.contacto[p.contacto] || '—'],
-    ['12', 'Canal', p.canal, labels.canal[p.canal] || '—'],
-    ['13', 'Marca', p.marca, 'Cliente / marca comercial'],
-    ['14', 'Versión arte', p.version, 'Cambia con cada nuevo diseño'],
+    ['4', 'Contacto alimento', p.contacto, labels.contacto[p.contacto] || '—'],
+    ['5', 'Gramaje', p.gramajeBanda, `${p.gramajeRaw || 0} g/m² → banda ${p.gramajeBanda}`],
+    ['6', 'Ancho', p.ancho, `${p.anchoRaw || 0} cm → ×10 → ${p.ancho}`],
+    ['7', 'Fuelle', p.fuelle, `${p.fuelleRaw || 0} cm → ×10 → ${p.fuelle}`],
+    ['8', 'Alto', p.alto, `${p.altoRaw || 0} cm → ×10 → ${p.alto}`],
+    ['9', 'Impresión', p.imp, labels.imp[p.imp] || '—'],
+    ['10', 'Estampado', p.estampado, labels.estampado[p.estampado] || '—'],
+    ['11', 'Corte', p.corte, labels.corte[p.corte] || '—'],
+    ['12', 'Manija', p.manija, labels.manija[p.manija] || '—'],
+    ['13', 'Canal', p.canal, labels.canal[p.canal] || '—'],
+    ['14', 'Marca', p.marca, 'Cliente / marca comercial'],
+    ['15', 'Versión arte', p.version, 'Cambia con cada nuevo diseño'],
   ];
 }
 

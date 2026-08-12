@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
   dimTo3,
   pad,
+  gramajeABanda,
   computeProductCode,
   buildDecodeRows,
   validateProductCode,
@@ -63,19 +64,41 @@ describe('pad', () => {
   });
 });
 
+describe('gramajeABanda', () => {
+  test('trata 0 o vacío como banda "0"', () => {
+    assert.equal(gramajeABanda(0), '0');
+    assert.equal(gramajeABanda(''), '0');
+    assert.equal(gramajeABanda(undefined), '0');
+  });
+
+  test('mapea gramajes a la banda correspondiente por rango', () => {
+    assert.equal(gramajeABanda(39), '1');
+    assert.equal(gramajeABanda(40), '2');
+    assert.equal(gramajeABanda(59), '2');
+    assert.equal(gramajeABanda(60), '3');
+    assert.equal(gramajeABanda(100), '5');
+    assert.equal(gramajeABanda(145), '8');
+  });
+
+  test('cualquier gramaje por encima del último corte cae en la banda "9"', () => {
+    assert.equal(gramajeABanda(200), '9');
+  });
+});
+
 function baseRaw(overrides = {}) {
   return {
     tipo: 'Q',
     cert: 'SC',
     mat: '01',
+    contacto: '0',
     gram: '100',
     ancho: '20',
     fuelle: '12',
     alto: '25',
     imp: '0',
+    estampado: '0',
     corte: '0',
     manija: '0',
-    contacto: '0',
     canal: 'N',
     marca: 'nor',
     version: '1',
@@ -86,14 +109,26 @@ function baseRaw(overrides = {}) {
 describe('computeProductCode', () => {
   test('arma el núcleo y el código completo con el guión en la posición correcta', () => {
     const p = computeProductCode(baseRaw());
-    assert.equal(p.core, 'QSC011002001202500000');
-    assert.equal(p.fullCode, 'QSC011002001202500000-NNOR00001');
+    assert.equal(p.core, 'QSC01020012025050000');
+    assert.equal(p.fullCode, 'QSC01020012025050000-NNOR00001');
   });
 
-  test('el contacto con alimento va antes del guión y el canal después', () => {
-    const p = computeProductCode(baseRaw({ contacto: '1', canal: 'E' }));
-    assert.ok(p.core.endsWith('1'));
-    assert.ok(p.fullCode.split('-')[1].startsWith('E'));
+  test('el contacto con alimento va justo después del material, no al final del núcleo', () => {
+    const p = computeProductCode(baseRaw({ contacto: '1' }));
+    // core = tipo(1) + cert(2) + mat(2) + contacto(1) + ... -> el dígito 6 (índice 5) es el contacto.
+    assert.equal(p.core.charAt(5), '1');
+  });
+
+  test('el gramaje se codifica como banda, no como valor exacto', () => {
+    const p = computeProductCode(baseRaw({ gram: '145' }));
+    assert.equal(p.gramajeBanda, '8');
+    assert.equal(p.gramajeRaw, '145');
+  });
+
+  test('impresión y estampado son dígitos independientes', () => {
+    const p = computeProductCode(baseRaw({ imp: '8', estampado: '2' }));
+    assert.equal(p.imp, '8');
+    assert.equal(p.estampado, '2');
   });
 
   test('convierte la marca a mayúsculas', () => {
@@ -116,9 +151,8 @@ describe('computeProductCode', () => {
     assert.equal(p.version, '00007');
   });
 
-  test('usa 0 cuando el gramaje o la versión vienen vacíos', () => {
-    const p = computeProductCode(baseRaw({ gram: '', version: '' }));
-    assert.equal(p.gram, '000');
+  test('usa la versión 0 cuando viene vacía', () => {
+    const p = computeProductCode(baseRaw({ version: '' }));
     assert.equal(p.version, '00000');
   });
 
@@ -126,6 +160,11 @@ describe('computeProductCode', () => {
     const p = computeProductCode(baseRaw({ ancho: '5.5' }));
     assert.equal(p.anchoRaw, '5.5');
     assert.equal(p.ancho, '055');
+  });
+
+  test('el código completo tiene 30 caracteres (20 núcleo + guión + 9 sufijo)', () => {
+    const p = computeProductCode(baseRaw());
+    assert.equal(p.fullCode.length, 30);
   });
 });
 
@@ -135,17 +174,26 @@ describe('buildDecodeRows', () => {
     cert: { SC: 'Sin certificación' },
     mat: { '01': 'Virgen' },
     imp: { 0: 'Sin impresión' },
+    estampado: { 0: 'Sin estampado' },
     corte: { 0: 'Sin corte' },
     manija: { 0: 'Sin manija' },
     contacto: { 0: 'No tiene contacto directo con alimento' },
     canal: { N: 'Nacional' },
   };
 
-  test('arma 14 filas con el código y la etiqueta de cada campo', () => {
+  test('arma 15 filas con el código y la etiqueta de cada campo', () => {
     const p = computeProductCode(baseRaw());
     const rows = buildDecodeRows(p, labels);
-    assert.equal(rows.length, 14);
+    assert.equal(rows.length, 15);
     assert.deepEqual(rows[0], ['1', 'Tipo', 'Q', 'Bolsa fondo cuadrado']);
+  });
+
+  test('la fila de gramaje muestra el valor crudo y la banda resultante', () => {
+    const p = computeProductCode(baseRaw({ gram: '100' }));
+    const rows = buildDecodeRows(p, labels);
+    const filaGramaje = rows.find((r) => r[1] === 'Gramaje');
+    assert.equal(filaGramaje[2], '5');
+    assert.match(filaGramaje[3], /100 g\/m² → banda 5/);
   });
 
   test('usa "—" cuando no hay etiqueta para un código', () => {
@@ -156,7 +204,7 @@ describe('buildDecodeRows', () => {
 });
 
 describe('validateProductCode', () => {
-  const labels = { mat: { '08': 'Rollo térmico', '09': 'Rollo Bond' } };
+  const labels = { mat: { '08': 'Rollo térmico', '09': 'Rollo blanco' } };
 
   test('no genera advertencias para un código válido y completo', () => {
     const p = computeProductCode(baseRaw());

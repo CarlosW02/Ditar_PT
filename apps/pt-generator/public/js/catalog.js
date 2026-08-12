@@ -1,6 +1,12 @@
 // Catálogo de opciones (tipo, certificación, material, ...): fuente de
 // verdad en Supabase, con respaldo local para cuando no hay conexión o el
 // proyecto no está configurado.
+//
+// material/corte/manija/impresion/estampado se alinearon con
+// catalogosCaptura.ts de ditar-commercial-system (extraído directo de
+// Cotizador_Ditar_piloto V20·R3 — el propio repo anterior documenta que el
+// Excel MDM quedó desactualizado frente al piloto, así que el piloto es la
+// fuente de verdad).
 
 export const FALLBACK_LABELS = {
   tipo: {
@@ -29,38 +35,46 @@ export const FALLBACK_LABELS = {
     '06': 'MF Natural',
     '07': 'MF Blanco',
     '08': 'Rollo térmico',
-    '09': 'Rollo Bond',
+    '09': 'Rollo blanco',
     10: 'Esmaltado',
     11: 'Earthpack',
-    '00': 'Especial/No codificado',
+    XX: 'Especial/No codificado',
   },
   imp: {
     0: 'Sin impresión',
-    1: 'Simple 1 color',
-    2: 'Simple 2 colores',
-    3: 'Simple 3 colores',
-    4: 'Simple 4 colores',
-    5: 'Simple 5 colores',
-    6: 'Simple 6 colores',
-    7: 'Simple >6 colores',
-    8: 'Impresión + Estampado',
-    9: 'Especial',
+    1: '1 tinta',
+    2: '2 tintas',
+    3: '3 tintas',
+    4: '4 tintas',
+    5: '5 tintas',
+    6: '6 tintas',
+    7: '7 tintas',
+    8: '8 tintas',
+    X: 'Especial/No codificado',
+  },
+  estampado: {
+    0: 'Sin estampado',
+    1: '1 foil',
+    2: '2 foil',
+    X: 'Especial/No codificado',
   },
   corte: {
     0: 'Sin corte',
     1: 'Corte liso',
     2: 'Corte dentado',
     3: 'Corte en J',
-    4: 'Corte liso por doblez',
-    E: 'Especial',
+    4: 'Corte liso con doblez',
+    X: 'Especial/No codificado',
   },
   manija: {
     0: 'Sin manija',
     1: 'Entorchada',
     2: 'Plana',
     3: 'Algodón',
-    4: 'Diecut',
-    E: 'Especial',
+    4: 'Troquelado (Diecut)',
+    5: 'Cordón de tela 5mm',
+    6: 'Cordón de tela 2cm',
+    X: 'Especial/No codificado',
   },
   contacto: {
     0: 'No tiene contacto directo con alimento',
@@ -74,6 +88,7 @@ export const CATALOG_TABLES = [
   { table: 'certificacion', key: 'cert', selectId: 'cert' },
   { table: 'material', key: 'mat', selectId: 'mat' },
   { table: 'impresion', key: 'imp', selectId: 'imp' },
+  { table: 'estampado', key: 'estampado', selectId: 'estampado' },
   { table: 'corte', key: 'corte', selectId: 'corte' },
   { table: 'manija', key: 'manija', selectId: 'manija' },
   { table: 'contacto_alimento', key: 'contacto', selectId: 'contacto' },

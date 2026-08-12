@@ -1,31 +1,20 @@
-# Ditar ERP
+# Ditar_PT
 
-Monorepo del ERP de Ditar SAS. Cada app vive en `apps/` como su propio
-proyecto (dependencias, build, tests, deploy), compartiendo herramientas de
-calidad de código (ESLint/Prettier) desde la raíz vía npm workspaces.
+Repo del generador de código de producto (Nomenclatura PT v1.0) de Ditar SAS —
+ver [`apps/pt-generator`](apps/pt-generator/README.md) para el detalle.
 
-## Apps
-
-| App                                                | Descripción                                                                                  | Estado        |
-| -------------------------------------------------- | -------------------------------------------------------------------------------------------- | ------------- |
-| [`apps/pt-generator`](apps/pt-generator/README.md) | Generador de código de producto (Nomenclatura PT v1.0)                                       | En producción |
-| [`apps/comercial`](apps/comercial/README.md)       | Módulo Comercial: CRM, cotizaciones, pedidos, dashboard, solicitudes de código PT / OP a SAP | En desarrollo |
-
-Cada app se despliega como su propio proyecto de Vercel (Root Directory
-apuntando a su carpeta), y cada una tiene su propio proyecto de Supabase —
-no comparten base de datos.
+Estructura de monorepo (npm workspaces) por si en el futuro se agrega otra
+app relacionada con el generador de código; el módulo Comercial del ERP se
+desarrolla en un repo aparte (`ditar-commercial-system`), no aquí.
 
 ## Comandos desde la raíz
 
 ```bash
-npm install         # instala dependencias de todas las apps
+npm install         # instala dependencias
 npm run lint         # ESLint sobre todo el repo
 npm run format       # Prettier --write sobre todo el repo
 npm run format:check # Prettier --check (lo que corre en CI)
-npm test              # corre los tests de cada app que los tenga
+npm test              # corre los tests
 ```
-
-Para correr un comando de una sola app: `npm run <script> --workspace=apps/<app>`
-(ej. `npm run dev --workspace=apps/pt-generator`).
 
 CI (GitHub Actions) corre lint, format:check y test en cada push/PR a `main`.

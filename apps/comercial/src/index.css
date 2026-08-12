@@ -1,0 +1,18 @@
+:root {
+  color-scheme: light;
+  font-family:
+    'IBM Plex Sans',
+    system-ui,
+    -apple-system,
+    sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #f5f4f1;
+  color: #14181d;
+}

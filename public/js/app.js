@@ -2,7 +2,7 @@
 // codeGenerator.js, pinta el resultado, y sincroniza el catálogo con
 // Supabase (catalog.js) al cargar la página.
 
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.112.3';
 import { FALLBACK_LABELS, CATALOG_TABLES, fetchCatalogTable } from './catalog.js';
 import { computeProductCode, buildDecodeRows, validateProductCode } from './codeGenerator.js';
 

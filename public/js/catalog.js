@@ -24,11 +24,26 @@ export const CATALOG_TABLES = [
   {table:'canal',             key:'canal',    selectId:'canal'},
 ];
 
-export async function fetchCatalogTable(client, tableName) {
-  const { data, error } = await client
-    .from(tableName)
-    .select('code,label')
-    .order('sort_order', { ascending: true });
+export const CATALOG_FETCH_TIMEOUT_MS = 8000;
+
+function withTimeout(promise, ms, tableName) {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      reject(new Error(`Tiempo de espera agotado (${ms}ms) al cargar "${tableName}"`));
+    }, ms);
+    Promise.resolve(promise).then(
+      (value) => { clearTimeout(timer); resolve(value); },
+      (err) => { clearTimeout(timer); reject(err); },
+    );
+  });
+}
+
+export async function fetchCatalogTable(client, tableName, timeoutMs = CATALOG_FETCH_TIMEOUT_MS) {
+  const { data, error } = await withTimeout(
+    client.from(tableName).select('code,label').order('sort_order', { ascending: true }),
+    timeoutMs,
+    tableName,
+  );
   if (error) throw error;
   if (!data || !data.length) throw new Error(`Tabla "${tableName}" vacía`);
   return data;

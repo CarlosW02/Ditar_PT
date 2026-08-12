@@ -11,10 +11,10 @@ module.exports = [
     },
   },
   {
-    ignores: ['node_modules/**', 'public/config.js'],
+    ignores: ['node_modules/**', 'apps/pt-generator/public/config.js', 'apps/comercial/dist/**'],
   },
   {
-    files: ['public/js/**/*.js'],
+    files: ['apps/pt-generator/public/js/**/*.js'],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'module',
@@ -22,7 +22,7 @@ module.exports = [
     },
   },
   {
-    files: ['public/js/**/*.test.mjs'],
+    files: ['apps/pt-generator/public/js/**/*.test.mjs'],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'module',
@@ -30,7 +30,7 @@ module.exports = [
     },
   },
   {
-    files: ['build.js', 'eslint.config.js'],
+    files: ['apps/pt-generator/build.js', 'eslint.config.js'],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'commonjs',

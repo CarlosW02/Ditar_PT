@@ -1,15 +1,14 @@
 {
-  "name": "ditar-generador-codigo",
-  "version": "1.0.0",
+  "name": "ditar-erp",
   "private": true,
-  "description": "Ditar SAS · Generador de Código de Producto (Nomenclatura PT v1.0), con catálogo de campos servido desde Supabase.",
+  "workspaces": [
+    "apps/*"
+  ],
   "scripts": {
-    "build": "node build.js",
-    "dev": "node build.js && npx --yes serve public",
-    "test": "node --test public/js/*.test.mjs",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "test": "npm run test --workspaces --if-present"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

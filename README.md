@@ -1,74 +1,31 @@
-# Ditar SAS · Generador de Código de Producto
+# Ditar ERP
 
-Sitio estático (HTML/CSS/JS, sin framework) que genera y decodifica el código
-de producto según la Nomenclatura PT v1.0. El catálogo de opciones (tipo,
-certificación, material, impresión, corte, manija, canal) se sirve desde
-Supabase; si no hay conexión o no está configurado, la app cae de vuelta a un
-catálogo local embebido para no romper el flujo.
+Monorepo del ERP de Ditar SAS. Cada app vive en `apps/` como su propio
+proyecto (dependencias, build, tests, deploy), compartiendo herramientas de
+calidad de código (ESLint/Prettier) desde la raíz vía npm workspaces.
 
-## Estructura
+## Apps
 
-```
-public/index.html   # app (HTML + CSS + JS del generador/decodificador)
-build.js             # genera public/config.js con las credenciales de Supabase
-vercel.json           # build estático: node build.js -> public/
-supabase/schema.sql   # tablas de catálogo + RLS + datos semilla
-.env.example           # variables de entorno esperadas
-```
+| App                                                | Descripción                                                                                  | Estado        |
+| -------------------------------------------------- | -------------------------------------------------------------------------------------------- | ------------- |
+| [`apps/pt-generator`](apps/pt-generator/README.md) | Generador de código de producto (Nomenclatura PT v1.0)                                       | En producción |
+| [`apps/comercial`](apps/comercial/README.md)       | Módulo Comercial: CRM, cotizaciones, pedidos, dashboard, solicitudes de código PT / OP a SAP | En desarrollo |
 
-## 1. Supabase
+Cada app se despliega como su propio proyecto de Vercel (Root Directory
+apuntando a su carpeta), y cada una tiene su propio proyecto de Supabase —
+no comparten base de datos.
 
-1. Crea un proyecto (o usa uno existente) en [supabase.com](https://supabase.com).
-2. Abre **SQL Editor** y ejecuta el contenido de [`supabase/schema.sql`](supabase/schema.sql).
-   Esto crea las 7 tablas de catálogo, habilita Row Level Security y deja una
-   política de **solo lectura pública** (la app nunca escribe en la base).
-3. En **Settings → API** copia:
-   - `Project URL` → `SUPABASE_URL`
-   - `anon public` key → `SUPABASE_ANON_KEY`
-
-La anon key es segura para exponer en el cliente porque RLS solo permite
-`SELECT`.
-
-## 2. Desarrollo local
+## Comandos desde la raíz
 
 ```bash
-cp .env.example .env
-# edita .env con tus valores de Supabase
-export $(grep -v '^#' .env | xargs)   # o cárgalas como prefieras
-npm run build
-npm run dev
+npm install         # instala dependencias de todas las apps
+npm run lint         # ESLint sobre todo el repo
+npm run format       # Prettier --write sobre todo el repo
+npm run format:check # Prettier --check (lo que corre en CI)
+npm test              # corre los tests de cada app que los tenga
 ```
 
-`npm run dev` regenera `public/config.js` y sirve `public/` en un puerto local.
+Para correr un comando de una sola app: `npm run <script> --workspace=apps/<app>`
+(ej. `npm run dev --workspace=apps/pt-generator`).
 
-## 3. Deploy en Vercel
-
-```bash
-npx vercel login
-npx vercel link
-npx vercel env add SUPABASE_URL production
-npx vercel env add SUPABASE_ANON_KEY production
-npx vercel --prod
-```
-
-`vercel.json` ya define `buildCommand: node build.js` y `outputDirectory: public`,
-así que Vercel genera `config.js` en cada build con las env vars del proyecto.
-
-## Calidad de código
-
-```bash
-npm install     # instala eslint/prettier (una sola vez)
-npm run lint    # revisa errores con ESLint
-npm run format  # aplica formato con Prettier
-npm test        # corre los tests
-```
-
-CI (GitHub Actions) corre lint, format:check y test en cada push/PR a
-`main` — corre estos comandos localmente antes de subir cambios para que
-no te sorprenda un check en rojo.
-
-## Editar el catálogo
-
-Para agregar o modificar opciones (nuevo material, nuevo canal, etc.) basta con
-editar las filas de la tabla correspondiente en Supabase — no requiere tocar
-el HTML ni redeploy.
+CI (GitHub Actions) corre lint, format:check y test en cada push/PR a `main`.
